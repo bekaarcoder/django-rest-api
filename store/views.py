@@ -8,10 +8,11 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import status
 
 from store.filters import ProductFilter
+from store.pagination import DefaultPagination
 from .models import Collection, Product, Review
 from .serializers import (
     CollectionSerializer,
@@ -23,9 +24,12 @@ from .serializers import (
 class ProductList(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     # filterset_fields = ["collection_id"]
     filterset_class = ProductFilter
+    pagination_class = DefaultPagination
+    search_fields = ["title", "description"]
+    ordering_fields = ["unit_price", "last_update"]
 
     # def get_queryset(self):
     #     queryset = Product.objects.all()
