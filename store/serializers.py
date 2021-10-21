@@ -1,6 +1,31 @@
 from decimal import Decimal
 from rest_framework import serializers
-from store.models import Cart, CartItem, Product, Collection, Review
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from djoser.serializers import UserSerializer as BaseUserSerializer
+from store.models import Cart, CartItem, Customer, Product, Collection, Review
+
+
+class UserCreateSerializer(BaseUserCreateSerializer):
+    class Meta(BaseUserCreateSerializer.Meta):
+        fields = [
+            "id",
+            "username",
+            "email",
+            "password",
+            "first_name",
+            "last_name",
+        ]
+
+
+class UserSerializer(BaseUserSerializer):
+    class Meta(BaseUserSerializer.Meta):
+        fields = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+        ]
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -134,3 +159,11 @@ class UpdateCartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = ["quantity"]
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Customer
+        fields = ["id", "user_id", "phone", "birth_date", "membership"]

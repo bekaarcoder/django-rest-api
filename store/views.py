@@ -1,26 +1,33 @@
 from django.shortcuts import get_object_or_404
 from django.db.models.aggregates import Count
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.mixins import RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework.generics import (
     CreateAPIView,
     ListCreateAPIView,
+    RetrieveAPIView,
     RetrieveDestroyAPIView,
+    RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
+    UpdateAPIView,
 )
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from store.filters import ProductFilter
 from store.pagination import DefaultPagination
-from .models import Cart, CartItem, Collection, Product, Review
+from store.permissions import IsAdminOrReadOnly
+from .models import Cart, CartItem, Collection, Product, Review, Customer
 from .serializers import (
     AddCartItemSerializer,
     CartItemSerializer,
     CartSerializer,
     CollectionSerializer,
+    CustomerSerializer,
     ProductSerializer,
     ReviewSerializer,
     UpdateCartItemSerializer,
@@ -36,6 +43,7 @@ class ProductList(ListCreateAPIView):
     pagination_class = DefaultPagination
     search_fields = ["title", "description"]
     ordering_fields = ["unit_price", "last_update"]
+    permission_classes = [IsAdminOrReadOnly]
 
     # def get_queryset(self):
     #     queryset = Product.objects.all()
@@ -224,3 +232,23 @@ class CartSingleItemView(RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return CartItem.objects.filter(cart_id=self.kwargs["pk"])
+
+
+class CustomerView(CreateAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class CustomerProfileView(RetrieveUpdateAPIView):
+    serializer_class = CustomerSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        print(self.request.user.id)
+        return Customer.objects.all()
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, user_id=self.request.user.id)
+        return obj

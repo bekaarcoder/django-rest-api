@@ -11,8 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
-import rest_framework
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,11 +41,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "djoser",
     "django_filters",
     "debug_toolbar",
     "playground.apps.PlaygroundConfig",
     "store",
-    "store_custom",
+    # "core",
     "tags",
 ]
 
@@ -92,7 +92,7 @@ WSGI_APPLICATION = "storefront.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "storefront",
+        "NAME": "storefront2",
         "USER": "postgres",
         "PASSWORD": "postgres",
         "HOST": "localhost",
@@ -143,7 +143,27 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-REST_FRAMEWORK = {"COERCE_DECIMAL_TO_STRING": False}
+REST_FRAMEWORK = {
+    "COERCE_DECIMAL_TO_STRING": False,
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# AUTH_USER_MODEL = "core.User"
+
+DJOSER = {
+    "SERIALIZERS": {
+        "user_create": "store.serializers.UserCreateSerializer",
+        "current_user": "store.serializers.UserSerializer",
+    }
+}
 
 if DEBUG:
     import mimetypes

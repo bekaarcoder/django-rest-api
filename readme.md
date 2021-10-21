@@ -161,3 +161,14 @@
 ## Change admin password
 
 `> python manage.py changepassword admin`
+
+## RetrieveAPIView without a lookup_field
+
+We need to override the `get_object`
+
+```python
+def get_object(self):
+  queryset = self.get_queryset()
+  obj = get_object_or_404(queryset, user=self.request.user)
+  return obj
+```
